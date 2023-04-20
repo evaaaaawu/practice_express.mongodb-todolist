@@ -2,6 +2,7 @@ const express = require('express') // 載入 express 並建構應用程式伺服
 const mongoose = require('mongoose') // 載入 mongoose
 const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser') // 引用 body-parser
+const methodOverride = require('method-override') // 載入 method-override
 
 const Todo = require('./models/todo') // 載入 Todo model
 
@@ -10,6 +11,7 @@ if (process.env.NODE_ENV !== 'production') {
 } //僅在非正式環境時, 使用 dotenv
 
 const app = express()
+
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }) // 設定連線到 mongoDB
 
 // 取得資料庫連線狀態
@@ -27,6 +29,7 @@ app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs' }))
 app.set('view engine', 'hbs')
 
 app.use(bodyParser.urlencoded({ extended: true })) // 用 app.use 規定每一筆請求都需要透過 body-parser 進行前置處理
+app.use(methodOverride('_method')) // 設定每一筆請求都會透過 methodOverride 進行前置處理
 
 // 設定首頁路由
 app.get('/', (req, res) => {
@@ -64,7 +67,7 @@ app.get('/todos/:id/edit', (req, res) => {
     .catch(error => console.log(error))
 })
 
-app.post('/todos/:id/edit', (req, res) => {
+app.put('/todos/:id', (req, res) => {
   const id = req.params.id
   const { name, isDone } = req.body
   return Todo.findById(id)
@@ -77,7 +80,7 @@ app.post('/todos/:id/edit', (req, res) => {
     .catch(error => console.log(error))
 })
 
-app.post('/todos/:id/delete', (req, res) => {
+app.delete('/todos/:id', (req, res) => {
   const id = req.params.id
   return Todo.findById(id)
     .then(todo => todo.remove())

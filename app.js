@@ -5,23 +5,24 @@ const bodyParser = require('body-parser') // 引用 body-parser
 const methodOverride = require('method-override') // 載入 method-override
 const flash = require('connect-flash')   // 引用套件
 
-const routes = require('./routes') // 引用路由器
-
-const usePassport = require('./config/passport') // 載入設定檔，要寫在 express-session 以後
-
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 } //僅在非正式環境時, 使用 dotenv
 
+const routes = require('./routes') // 引用路由器
+
+const usePassport = require('./config/passport') // 載入設定檔，要寫在 express-session 以後
+
 require('./config/mongoose')
 
 const app = express()
+const PORT = process.env.PORT
 
 app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs' }))
 app.set('view engine', 'hbs')
 
 app.use(session({
-  secret: 'ThisIsMySecret',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true
 }))
@@ -39,7 +40,6 @@ app.use((req, res, next) => {
 })
 app.use(routes) // 將 request 導入路由器
 
-// 設定 port 3000
-app.listen(3000, () => {
+app.listen(PORT, () => {
   console.log('App is running on http://localhost:3000')
 })
